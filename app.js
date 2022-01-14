@@ -33,12 +33,11 @@ function onGetLoanPressed() {
     );
     if (loanAmount > 0) {
       if (loanAmount <= currentBalance * 2) {
-        currentBalance += loanAmount;
         currentLoanBalance = loanAmount;
         isLoanPaid = false;
 
         currentBalanceElement.innerHTML = `${currentBalance} e`;
-        currentLoanBalanceElement.innerHTML = `${loanAmount} e`;
+        currentLoanBalanceElement.innerHTML = `${currentLoanBalance} e`;
 
         loanButton.setAttribute("disabled", "true");
         setElementVisibility(payLoanButton, true);
@@ -52,13 +51,19 @@ function onGetLoanPressed() {
 }
 
 function onPayLoan() {
-  isLoanPaid = true;
-  currentLoanBalance = 0;
-
-  setButtonState(loanButton, true);
-  setElementVisibility(payLoanButton, false);
-
-  currentLoanBalanceElement.innerHTML = `0 e`;
+  if (currentPay >= currentLoanBalance) {
+    isLoanPaid = true;
+    currentPay -= currentLoanBalance;
+    currentLoanBalance = 0;
+  
+    setButtonState(loanButton, true);
+    setElementVisibility(payLoanButton, false);
+  
+    currentLoanBalanceElement.innerHTML = `0 e`;
+    currentPayElement.innerHTML = `${currentPay} e`;
+  } else {
+    console.error('Not enough money to pay for loan');
+  }
 }
 
 function onWork() {
@@ -71,10 +76,13 @@ function onBankPayBalance() {
   if (currentPay > 0) {
     // If user has loan, 10% of the salary goes to paying the loan when banking salary
     const loanPayment = 0.1 * currentPay;
-    currentPay -= loanPayment;
-    currentLoanBalance -= loanPayment;
+    currentLoanBalance -= loanPayment
+    
+    // TODO: Can be cleaned
+    if (currentLoanBalance < 0) { currentLoanBalance = 0; }
+    
+    currentBalance += currentPay - loanPayment;
 
-    currentBalance += currentPay;
     currentPay = 0;
 
     currentBalanceElement.innerHTML = `${currentBalance} e`;
