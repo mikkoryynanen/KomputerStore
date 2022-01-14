@@ -1,0 +1,26 @@
+.header {
+    height: 75px;
+}
+
+.top-card {
+    width: 300px; 
+    height: 200px;
+    border: 0;
+}
+
+.info-row {
+    /* border: none; */
+    width: 100%;
+}
+
+.computer-img {
+    height: 256px;
+    width: 256px;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
