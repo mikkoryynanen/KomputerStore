@@ -2,14 +2,11 @@
     height: 75px;
 }
 
-.top-content {
-    height: 400px;
-}
-
 .top-card {
     width: 300px; 
-    height: 200px;
+    /* height: 375px; */
     border: 0;
+    margin: 0 25px 25px 25px;
 }
 
 .info-row {
@@ -17,7 +14,7 @@
     width: 100%;
 }
 
-.computer-img {
+#computer-img {
     height: 256px;
     width: 256px;
 }
@@ -27,4 +24,8 @@ ul {
     margin: 0;
     padding: 0;
     line-height: 1;
+}
+
+.card-bg {
+    background-color: rgb(240, 240, 240);
 }

@@ -1,19 +1,25 @@
-let currentBalance = 500;
+let currentBalance = 500000;
 let currentLoanBalance = 0;
 let currentPay = 0;
 let isLoanPaid = true;
 let computers = [];
 
 const currentBalanceElement = document.getElementById("balance");
+const loanContentElement = document.getElementById("loan-content");
 const currentLoanBalanceElement = document.getElementById("loan-balance");
 const currentPayElement = document.getElementById("pay");
 const computerInfoElement = document.getElementById("computer-info");
 const computersDropdownElement = document.getElementById("computers-dropdown");
 const computersDropdownNameElement = document.getElementById("dropdown-selected");
+const computersInfoNameElement = document.getElementById("info-computer-name");
+const computersInfoElement = document.getElementById("info-computer");
+const computersInfoPriceElement = document.getElementById("info-computer-price");
+const computersInfoStockElement = document.getElementById("info-computer-stock");
 
 const loanButton = document.getElementById("loan-button");
 const payLoanButton = document.getElementById("pay-loan-button");
 const bankButton = document.getElementById("bank-button");
+const infoComputerBuyButton = document.getElementById("info-computer-buy-btn");
 
 const computerImage = document.getElementById("computer-img");
 
@@ -22,6 +28,7 @@ currentPayElement.innerHTML = `${currentPay} e`;
 
 setButtonState(bankButton, false);
 setElementVisibility(payLoanButton, false);
+setElementVisibility(loanContentElement, false);
 
 window.onload = async () => {
   const data = await (
@@ -34,11 +41,11 @@ window.onload = async () => {
   selectComputer(data[0]);
 
   // Build selected computers features list
-  data[0].specs.map((info) => {
-    let li = generateElement("li");
-    li.textContent = info;
-    computerInfoElement.appendChild(li);
-  });
+  // data[0].specs.map((info) => {
+  //   let li = generateElement("li");
+  //   li.textContent = info;
+  //   computerInfoElement.appendChild(li);
+  // });
 };
 
 function selectComputer(selectedComputer) {
@@ -46,29 +53,28 @@ function selectComputer(selectedComputer) {
     return c !== selectedComputer;
   });
 
-  while (computersDropdownElement.firstChild) {
-    computersDropdownElement.firstChild.remove();
-  }
+  clearElementChildren(computersDropdownElement);
 
   computersDropdownNameElement.innerHTML = selectedComputer.title;
 
+  // Build computer list
   for (const computer of newList) {
-    // Build list of
     let li = generateElement("li");
-    let button = generateElement("button");
-    button.textContent = computer.title;
-    button.addEventListener("click", () => {
+    li.textContent = computer.title;
+    li.addEventListener("click", () => {
       selectComputer(computer);
     });
-    button.classList.add("btn-text");
+    li.classList.add("list-group-item");
+    li.classList.add("list-group-item-action");
+    if (!computer.active)
+      li.classList.add('disabled');
+    
+    li.style.cursor = 'pointer';
 
     computersDropdownElement.appendChild(li);
-    li.appendChild(button);
   }
 
-  while (computerInfoElement.firstChild) {
-    computerInfoElement.firstChild.remove();
-  }
+  clearElementChildren(computerInfoElement);
 
   // Build specs for currently selected computer
   selectedComputer.specs.map((info) => {
@@ -78,7 +84,16 @@ function selectComputer(selectedComputer) {
   });
 
   // Build info panel
-  computerImage.src = './assets/images/1.jpeg';
+  computerImage.src = `https://noroff-komputer-store-api.herokuapp.com/${selectedComputer.image}`;
+  computersInfoNameElement.innerHTML = selectedComputer.title;
+  computersInfoElement.innerHTML = selectedComputer.description;
+  computersInfoPriceElement.innerHTML = `${selectedComputer.price} e`;
+  computersInfoStockElement.innerHTML = `Stock: ${selectedComputer.stock}`;
+
+  infoComputerBuyButton.onclick = () => {
+    (selectedComputer.price, selectedComputer.stock);  
+  };
+  setButtonState(infoComputerBuyButton, selectedComputer.stock > 0);
 }
 
 function onGetLoanPressed() {
@@ -86,7 +101,7 @@ function onGetLoanPressed() {
   // Add validation, only numbers should be allowed to be entererd
 
   if (!isLoanPaid) {
-    console.error(
+    alert(
       "You can only have one loan at a time. Pay it off before taking another one"
     );
   } else {
@@ -103,13 +118,14 @@ function onGetLoanPressed() {
         currentBalanceElement.innerHTML = `${currentBalance} e`;
         currentLoanBalanceElement.innerHTML = `${currentLoanBalance} e`;
 
-        loanButton.setAttribute("disabled", "true");
+        setButtonState(loanButton, true);
         setElementVisibility(payLoanButton, true);
+        setElementVisibility(loanContentElement, true);
       } else {
-        console.error("Cannot loan more than double your current bank balance");
+        alert("Cannot loan more than double your current bank balance");
       }
     } else {
-      console.error("Loan amount has to be more than 0");
+      alert("Loan amount has to be more than 0");
     }
   }
 }
@@ -122,11 +138,12 @@ function onPayLoan() {
 
     setButtonState(loanButton, true);
     setElementVisibility(payLoanButton, false);
+    setElementVisibility(loanContentElement, false);
 
     currentLoanBalanceElement.innerHTML = `0 e`;
     currentPayElement.innerHTML = `${currentPay} e`;
   } else {
-    console.error("Not enough money to pay for loan");
+    alert("Not enough money to pay for loan");
   }
 }
 
@@ -159,11 +176,29 @@ function onBankPayBalance() {
   }
 }
 
+function onBuyComputer(price, stock) {
+  // console.log(`currentBalance ${currentBalance} | price ${price}`);
+  if (currentBalance >= price) {
+    if (stock > 0) {
+      currentBalance -= price;
+      currentBalanceElement.innerHTML = `${currentBalance} e`;
+      stock--;
+      computersInfoStockElement.innerHTML = `Stock: ${stock}`;
+    } else {
+      alert('There is no stock');
+    }
+    setButtonState(infoComputerBuyButton, stock > 0);
+  } else {
+    alert('Not enough money to purchase laptop');
+  }
+}
+
 //#region Helpers
-// function updateBalance(balanceToAdd) {
-//   currentBalance += balanceToAdd;
-//   currentBalanceElement.innerHTML = `${currentBalance} e`;
-// }
+function clearElementChildren(element) {
+  while (element.firstChild) {
+    element.firstChild.remove();
+  }
+}
 
 function generateElement(element) {
   return document.createElement(element);
@@ -180,9 +215,11 @@ function setButtonState(button, state) {
 
 function setElementVisibility(element, state) {
   if (!state) {
-    element.setAttribute("hidden", "true");
+    // element.setAttribute("hidden", "true");
+    element.style.cssText = 'display:none !important';
   } else {
     element.removeAttribute("hidden");
+    element.style.display = "";
   }
 }
 //#endregion
