@@ -1,8 +1,8 @@
-let currentBalance = 500000;
+let currentBalance = 0;
 let currentLoanBalance = 0;
 let currentPay = 0;
-let isLoanPaid = true;
-let computers = [];
+let isLoanPaid = true;  // TODO can just check current loan balance, this would not be needed
+let computers = []; //TODO Can be cleaned up?
 
 const currentBalanceElement = document.getElementById("balance");
 const loanContentElement = document.getElementById("loan-content");
@@ -33,19 +33,12 @@ setElementVisibility(loanContentElement, false);
 window.onload = async () => {
   const data = await (
     await fetch("https://noroff-komputer-store-api.herokuapp.com/computers")
-  ).json();
-  console.log(data);
-  computers = data;
-
-  // alway select the first element from the computer list when entering the page
-  selectComputer(data[0]);
-
-  // Build selected computers features list
-  // data[0].specs.map((info) => {
-  //   let li = generateElement("li");
-  //   li.textContent = info;
-  //   computerInfoElement.appendChild(li);
-  // });
+    ).json();
+    console.log(data);
+    computers = data;
+    
+    // alway select the first element from the computer list when entering the page
+    selectComputer(data[0]);
 };
 
 function selectComputer(selectedComputer) {
@@ -66,10 +59,9 @@ function selectComputer(selectedComputer) {
     });
     li.classList.add("list-group-item");
     li.classList.add("list-group-item-action");
-    if (!computer.active)
-      li.classList.add('disabled');
-    
-    li.style.cursor = 'pointer';
+    if (!computer.active) li.classList.add("disabled");
+
+    li.style.cursor = "pointer";
 
     computersDropdownElement.appendChild(li);
   }
@@ -91,46 +83,57 @@ function selectComputer(selectedComputer) {
   computersInfoStockElement.innerHTML = `Stock: ${selectedComputer.stock}`;
 
   infoComputerBuyButton.onclick = () => {
-    (selectedComputer.price, selectedComputer.stock);  
+    onBuyComputer(selectedComputer.price, selectedComputer.stock);
   };
+
   setButtonState(infoComputerBuyButton, selectedComputer.stock > 0);
 }
 
 function onGetLoanPressed() {
-  // TODO:
-  // Add validation, only numbers should be allowed to be entererd
+  if (currentBalance > 0) {
+    // TODO:
+    // Add validation, only numbers should be allowed to be entererd
 
-  if (!isLoanPaid) {
-    alert(
-      "You can only have one loan at a time. Pay it off before taking another one"
-    );
-  } else {
-    const loanAmount = parseInt(
-      prompt(
-        `Please enter loan amount. Max load amount is ${currentBalance * 2}`
-      )
-    );
-    if (loanAmount > 0) {
-      if (loanAmount <= currentBalance * 2) {
-        currentLoanBalance = loanAmount;
-        isLoanPaid = false;
-
-        currentBalanceElement.innerHTML = `${currentBalance} e`;
-        currentLoanBalanceElement.innerHTML = `${currentLoanBalance} e`;
-
-        setButtonState(loanButton, true);
-        setElementVisibility(payLoanButton, true);
-        setElementVisibility(loanContentElement, true);
-      } else {
-        alert("Cannot loan more than double your current bank balance");
-      }
+    if (!isLoanPaid) {
+      alert(
+        "You can only have one loan at a time. Pay it off before taking another one"
+      );
     } else {
-      alert("Loan amount has to be more than 0");
+      let givenValue = prompt(
+        `Please enter loan amount. Max load amount is ${currentBalance * 2}`
+      );
+      if (isNaN(givenValue)) {
+        alert('Only numbers are allowed to be entered');
+      } else {
+        const loanAmount = parseInt(givenValue);
+        if (loanAmount > 0) {
+          if (loanAmount <= currentBalance * 2) {
+            currentLoanBalance = loanAmount;
+            isLoanPaid = false;
+
+            currentBalanceElement.innerHTML = `${currentBalance} e`;
+            currentLoanBalanceElement.innerHTML = `${currentLoanBalance} e`;
+
+            setButtonState(loanButton, true);
+            setElementVisibility(payLoanButton, true);
+            setElementVisibility(loanContentElement, true);
+          } else {
+            alert("Cannot loan more than double your current bank balance");
+          }
+        } else {
+          alert("Loan amount has to be more than 0");
+        }
+      }
     }
+  } else {
+    alert("You ned to have money to take up a loan");
   }
 }
 
 function onPayLoan() {
+  // TODO validate that it is working.
+  // Current pay balance should go to payig the loan
+  // Anything that goes over, goes to your bank
   if (currentPay >= currentLoanBalance) {
     isLoanPaid = true;
     currentPay -= currentLoanBalance;
@@ -155,16 +158,19 @@ function onWork() {
 
 function onBankPayBalance() {
   if (currentPay > 0) {
-    // If user has loan, 10% of the salary goes to paying the loan when banking salary
-    const loanPayment = 0.1 * currentPay;
-    currentLoanBalance -= loanPayment;
+    if (currentLoanBalance > 0) {
+      // If user has loan, 10% of the salary goes to paying the loan when banking salary
+      const loanPayment = 0.1 * currentPay;
+      currentLoanBalance -= loanPayment;
 
-    // TODO: Can be cleaned
-    if (currentLoanBalance < 0) {
-      currentLoanBalance = 0;
+      // TODO: Can be cleaned
+      if (currentLoanBalance < 0) {
+        currentLoanBalance = 0;
+      }
+      currentBalance += currentPay - loanPayment;
+    } else {
+      currentBalance += currentPay;
     }
-
-    currentBalance += currentPay - loanPayment;
 
     currentPay = 0;
 
@@ -184,12 +190,13 @@ function onBuyComputer(price, stock) {
       currentBalanceElement.innerHTML = `${currentBalance} e`;
       stock--;
       computersInfoStockElement.innerHTML = `Stock: ${stock}`;
+      alert("You purchased a computer!");
     } else {
-      alert('There is no stock');
+      alert("There is no stock");
     }
     setButtonState(infoComputerBuyButton, stock > 0);
   } else {
-    alert('Not enough money to purchase laptop');
+    alert("Not enough money to purchase laptop");
   }
 }
 
@@ -216,7 +223,7 @@ function setButtonState(button, state) {
 function setElementVisibility(element, state) {
   if (!state) {
     // element.setAttribute("hidden", "true");
-    element.style.cssText = 'display:none !important';
+    element.style.cssText = "display:none !important";
   } else {
     element.removeAttribute("hidden");
     element.style.display = "";

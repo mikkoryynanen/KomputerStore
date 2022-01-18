@@ -3,14 +3,16 @@
 }
 
 .top-card {
-    width: 300px; 
-    /* height: 375px; */
+    max-width: 50%;
     border: 0;
     margin: 0 25px 25px 25px;
 }
 
+.bottom-card {
+    width: 75%
+}
+
 .info-row {
-    /* border: none; */
     width: 100%;
 }
 
