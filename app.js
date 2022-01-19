@@ -1,8 +1,7 @@
 let currentBalance = 0;
 let currentLoanBalance = 0;
 let currentPay = 0;
-let isLoanPaid = true;  // TODO can just check current loan balance, this would not be needed
-let computers = []; //TODO Can be cleaned up?
+let computers = [];
 
 const currentBalanceElement = document.getElementById("balance");
 const loanContentElement = document.getElementById("loan-content");
@@ -91,10 +90,7 @@ function selectComputer(selectedComputer) {
 
 function onGetLoanPressed() {
   if (currentBalance > 0) {
-    // TODO:
-    // Add validation, only numbers should be allowed to be entererd
-
-    if (!isLoanPaid) {
+    if (currentLoanBalance > 0) {
       alert(
         "You can only have one loan at a time. Pay it off before taking another one"
       );
@@ -109,7 +105,6 @@ function onGetLoanPressed() {
         if (loanAmount > 0) {
           if (loanAmount <= currentBalance * 2) {
             currentLoanBalance = loanAmount;
-            isLoanPaid = false;
 
             currentBalanceElement.innerHTML = `${currentBalance} e`;
             currentLoanBalanceElement.innerHTML = `${currentLoanBalance} e`;
@@ -131,20 +126,20 @@ function onGetLoanPressed() {
 }
 
 function onPayLoan() {
-  // TODO validate that it is working.
-  // Current pay balance should go to payig the loan
-  // Anything that goes over, goes to your bank
   if (currentPay >= currentLoanBalance) {
-    isLoanPaid = true;
     currentPay -= currentLoanBalance;
     currentLoanBalance = 0;
+
+    currentBalance += currentPay;
+    currentLoanBalanceElement.innerHTML = `0 e`;
+    currentPayElement.innerHTML = `${currentPay} e`;
+
+    currentPay = 0;
 
     setButtonState(loanButton, true);
     setElementVisibility(payLoanButton, false);
     setElementVisibility(loanContentElement, false);
 
-    currentLoanBalanceElement.innerHTML = `0 e`;
-    currentPayElement.innerHTML = `${currentPay} e`;
   } else {
     alert("Not enough money to pay for loan");
   }
@@ -163,10 +158,10 @@ function onBankPayBalance() {
       const loanPayment = 0.1 * currentPay;
       currentLoanBalance -= loanPayment;
 
-      // TODO: Can be cleaned
       if (currentLoanBalance < 0) {
         currentLoanBalance = 0;
       }
+
       currentBalance += currentPay - loanPayment;
     } else {
       currentBalance += currentPay;
