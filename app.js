@@ -158,8 +158,11 @@ function onBankPayBalance() {
       const loanPayment = 0.1 * currentPay;
       currentLoanBalance -= loanPayment;
 
-      if (currentLoanBalance < 0) {
+      if (currentLoanBalance <= 0) {
         currentLoanBalance = 0;
+
+        setElementVisibility(payLoanButton, false);
+        setElementVisibility(loanContentElement, false);
       }
 
       currentBalance += currentPay - loanPayment;
