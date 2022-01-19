@@ -17,8 +17,8 @@
 }
 
 #computer-img {
-    height: 256px;
-    width: 256px;
+    width: 100%;
+    height: 100%;
 }
 
 ul {

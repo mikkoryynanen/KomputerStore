@@ -75,7 +75,7 @@ function selectComputer(selectedComputer) {
   });
 
   // Build info panel
-  computerImage.src = `https://noroff-komputer-store-api.herokuapp.com/${selectedComputer.image}`;
+  computerImage.src = `./${selectedComputer.image}`;
   computersInfoNameElement.innerHTML = selectedComputer.title;
   computersInfoElement.innerHTML = selectedComputer.description;
   computersInfoPriceElement.innerHTML = `${selectedComputer.price} e`;
