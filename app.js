@@ -129,12 +129,14 @@ function onPayLoan() {
   if (currentPay >= currentLoanBalance) {
     currentPay -= currentLoanBalance;
     currentLoanBalance = 0;
-
+    
     currentBalance += currentPay;
+    
+    currentPay = 0;
+
+    currentBalanceElement.innerHTML = `${currentBalance} e`;
     currentLoanBalanceElement.innerHTML = `0 e`;
     currentPayElement.innerHTML = `${currentPay} e`;
-
-    currentPay = 0;
 
     setButtonState(loanButton, true);
     setElementVisibility(payLoanButton, false);
